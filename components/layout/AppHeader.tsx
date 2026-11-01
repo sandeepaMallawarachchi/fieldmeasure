@@ -1,6 +1,7 @@
 import { ChevronLeft, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 import { IconButton } from "@/components/common/IconButton";
+import { LanguageSwitch } from "@/components/common/LanguageSwitch";
 import { Logo } from "@/components/common/Logo";
 import { t } from "@/lib/i18n";
 
@@ -8,9 +9,12 @@ export function AppHeader({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
     <header className="flex items-center justify-between bg-surface py-1 pr-2 pl-3 shadow-control md:rounded-b-3xl">
       <Logo />
-      <IconButton label={t.header.settings} onClick={onOpenSettings}>
-        <Settings className="size-6" aria-hidden />
-      </IconButton>
+      <div className="flex items-center gap-1">
+        <LanguageSwitch />
+        <IconButton label={t.header.settings} onClick={onOpenSettings}>
+          <Settings className="size-6" aria-hidden />
+        </IconButton>
+      </div>
     </header>
   );
 }

@@ -7,7 +7,7 @@
  * - Bump CACHE_VERSION when this file's caching behaviour changes. Hashed Next.js
  *   assets need no versioning, since their URLs change with their content.
  */
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `fieldmeasure-${CACHE_VERSION}`;
 const OFFLINE_URL = "/offline.html";
 const NAVIGATION_TIMEOUT_MS = 4000;

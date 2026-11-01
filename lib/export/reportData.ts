@@ -25,7 +25,7 @@ export function describeWarning(warning: MeasurementWarning): string {
 }
 
 export function formatDateTime(date: Date): string {
-  return date.toLocaleString("en-US", {
+  return date.toLocaleString(t.intlLocale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -46,13 +46,25 @@ export function buildReportData(state: MeasurementState): ReportData {
     measuredAt,
     acres: formatArea(areaM2, "acres"),
     areaRows: [
-      { label: t.units.squareMeters.label, value: `${formatArea(areaM2, "squareMeters")} m²` },
-      { label: t.units.hectares.label, value: `${formatArea(areaM2, "hectares")} ha` },
-      { label: t.units.perches.label, value: `${formatArea(areaM2, "perches")} P` },
+      {
+        label: t.units.squareMeters.label,
+        value: `${formatArea(areaM2, "squareMeters")} ${t.units.squareMeters.short}`,
+      },
+      {
+        label: t.units.hectares.label,
+        value: `${formatArea(areaM2, "hectares")} ${t.units.hectares.short}`,
+      },
+      {
+        label: t.units.perches.label,
+        value: `${formatArea(areaM2, "perches")} ${t.units.perches.short}`,
+      },
     ],
     perimeterRows: [
-      { label: t.report.meters, value: `${formatMeters(perimeterM)} m` },
-      { label: t.report.kilometers, value: `${formatKilometers(perimeterM)} km` },
+      { label: t.report.meters, value: `${formatMeters(perimeterM)} ${t.length.meters}` },
+      {
+        label: t.report.kilometers,
+        value: `${formatKilometers(perimeterM)} ${t.length.kilometers}`,
+      },
     ],
     metadataRows: [
       {
@@ -64,7 +76,10 @@ export function buildReportData(state: MeasurementState): ReportData {
         value:
           summary.medianAccuracyM === null
             ? t.gps.quality[summary.quality]
-            : `${t.gps.quality[summary.quality]} (±${summary.medianAccuracyM.toFixed(1)} m reported)`,
+            : t.report.reportedAccuracy(
+                t.gps.quality[summary.quality],
+                summary.medianAccuracyM.toFixed(1),
+              ),
       },
     ],
     notes: state.warnings.map(describeWarning),

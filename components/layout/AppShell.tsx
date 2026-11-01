@@ -2,7 +2,7 @@
 
 import { RotateCcw } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AppCredit } from "@/components/common/AppCredit";
 import { Toaster } from "@/components/common/Toaster";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
@@ -21,7 +21,7 @@ import { useGeolocation } from "@/hooks/useGeolocation";
 import { useRecordingGuards } from "@/hooks/useRecordingGuards";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
-import { t } from "@/lib/i18n";
+import { getLocale, initLocale, subscribeToLocale, t } from "@/lib/i18n";
 import type { MapController } from "@/lib/map/mapController";
 import { clearSession } from "@/lib/storage/measurementSession";
 import { cn } from "@/lib/utils";
@@ -55,6 +55,19 @@ function usePanelOffset(panelRef: React.RefObject<HTMLElement | null>) {
   }, [panelRef]);
 }
 
+/** Softens the instant swap of text when the language changes. */
+function useLocaleFade(locale: string) {
+  const previous = useRef(locale);
+  useEffect(() => {
+    if (previous.current === locale) return;
+    previous.current = locale;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    for (const element of document.querySelectorAll("[data-locale-fade]")) {
+      element.animate([{ opacity: 0.2 }, { opacity: 1 }], { duration: 220, easing: "ease-out" });
+    }
+  }, [locale]);
+}
+
 export function AppShell() {
   const status = useMeasurement((state) => state.status);
   const hasEdits = useMeasurement((state) => state.editedPoints !== null);
@@ -62,6 +75,11 @@ export function AppShell() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [confirmingBack, setConfirmingBack] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+
+  // Everything below reads text from `t`, so a language change re-renders from here.
+  const locale = useSyncExternalStore(subscribeToLocale, getLocale, () => "en");
+  useEffect(() => initLocale(), []);
+  useLocaleFade(locale);
 
   const recovery = useSessionPersistence();
   useGeolocation();
@@ -153,10 +171,10 @@ export function AppShell() {
         )}
       >
         {isReadyPhase && (
-          <>
+          <div data-locale-fade>
             <ReadyPanel />
             <AppCredit className="mt-3" />
-          </>
+          </div>
         )}
         {isRecording && <RecordingPanel />}
         {isReviewing && <ReviewPanel />}

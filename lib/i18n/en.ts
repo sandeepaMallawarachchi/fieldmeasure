@@ -5,6 +5,9 @@ import type { PolygonIssue } from "@/lib/geometry/validatePolygon";
 import type { MeasurementMethod } from "@/lib/measurement/selectors";
 
 export const en = {
+  intlLocale: "en-US",
+  /** Multiplies text sizes on the canvas report, matching the sizes set in globals.css. */
+  reportTextScale: 1,
   appTagline: "Measure land by walking.",
   common: {
     cancel: "Cancel",
@@ -16,7 +19,7 @@ export const en = {
     area: "Area",
     perimeter: "Perimeter",
   },
-  header: { settings: "Settings" },
+  header: { settings: "Settings", language: "Language" },
   gps: {
     signal: {
       off: "GPS: Off",
@@ -253,6 +256,7 @@ export const en = {
     gpsConditions: "GPS conditions",
     measured: "Measured",
     plainMap: "Map imagery unavailable. Boundary shown to scale.",
+    reportedAccuracy: (quality: string, meters: string) => `${quality} (±${meters} m reported)`,
     north: "N",
     meters: "Meters",
     kilometers: "Kilometers",

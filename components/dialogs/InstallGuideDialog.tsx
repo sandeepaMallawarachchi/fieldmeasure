@@ -20,19 +20,20 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const STEPS: Record<InstallPlatform, { icon: typeof Share; text: string }[]> = {
-  ios: [
-    { icon: Globe, text: t.install.ios[0] },
-    { icon: Share, text: t.install.ios[1] },
-    { icon: SquarePlus, text: t.install.ios[2] },
-    { icon: Check, text: t.install.ios[3] },
-  ],
-  android: [
-    { icon: Globe, text: t.install.android[0] },
-    { icon: EllipsisVertical, text: t.install.android[1] },
-    { icon: Download, text: t.install.android[2] },
-  ],
-};
+function getSteps(platform: InstallPlatform): { icon: typeof Share; text: string }[] {
+  return platform === "ios"
+    ? [
+        { icon: Globe, text: t.install.ios[0] },
+        { icon: Share, text: t.install.ios[1] },
+        { icon: SquarePlus, text: t.install.ios[2] },
+        { icon: Check, text: t.install.ios[3] },
+      ]
+    : [
+        { icon: Globe, text: t.install.android[0] },
+        { icon: EllipsisVertical, text: t.install.android[1] },
+        { icon: Download, text: t.install.android[2] },
+      ];
+}
 
 const subscribeToNothing = () => () => undefined;
 
@@ -107,7 +108,7 @@ export function InstallGuideDialog({ blocked }: { blocked: boolean }) {
           </Button>
         ) : (
           <ol className="mt-4 flex flex-col gap-3">
-            {STEPS[platform].map(({ icon: Icon, text }, index) => (
+            {getSteps(platform).map(({ icon: Icon, text }, index) => (
               <li key={text} className="flex items-center gap-3 text-[15px] leading-snug">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
                   <Icon className="size-5" aria-hidden />

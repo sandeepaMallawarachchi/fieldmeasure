@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildReportData, buildReportFilename } from "@/lib/export/reportData";
+import { setLocale, subscribeToLocale, t } from "@/lib/i18n";
+import { en } from "@/lib/i18n/en";
+import { si } from "@/lib/i18n/si";
 import { createPlainProjection } from "@/lib/export/renderMapImage";
 import {
   circlePolygon,
@@ -55,6 +58,68 @@ describe("map style configuration", () => {
 
   it("can disable network maps entirely", () => {
     expect(buildStyleOptions({ streetUrl: "none" }).map((option) => option.id)).toEqual(["plain"]);
+  });
+});
+
+describe("languages", () => {
+  afterEach(() => setLocale("en"));
+
+  function leaves(value: unknown, path = ""): [string, string][] {
+    if (typeof value === "string") return [[path, value]];
+    if (typeof value === "function") return [[path, String(value)]];
+    return Object.entries(value as object).flatMap(([key, child]) =>
+      leaves(child, `${path}.${key}`),
+    );
+  }
+
+  it("defines every message in both languages", () => {
+    const english = leaves(en);
+    const sinhala = new Map(leaves(si));
+    for (const [path] of english) expect(sinhala.get(path), path).toBeTruthy();
+    expect(sinhala.size).toBe(english.length);
+  });
+
+  it("has really translated the text, apart from names shown on screen", () => {
+    const untranslated = new Set([".settings.creditName", ".settings.creditUrl", ".intlLocale"]);
+    const sinhalaLetters = /[\u0D80-\u0DFF]/;
+    for (const [path, text] of leaves(si)) {
+      if (untranslated.has(path) || /\.short$/.test(path)) continue;
+      if (path === ".length.meters" || path === ".length.kilometers") continue;
+      expect(sinhalaLetters.test(text), `${path}: ${text}`).toBe(true);
+    }
+  });
+
+  it("switches the live text and notifies listeners", () => {
+    const listener = vi.fn();
+    const unsubscribe = subscribeToLocale(listener);
+    expect(t.ready.start).toBe("Start Measuring");
+    setLocale("si");
+    expect(t.ready.start).toBe("මැනීම අරඹන්න");
+    expect(document.documentElement.lang).toBe("si");
+    expect(listener).toHaveBeenCalledOnce();
+    unsubscribe();
+  });
+
+  it("prints the same measurement in Sinhala, with translated units", () => {
+    let state = createInitialState();
+    state = measurementReducer(state, { type: "START", mode: "manual", sessionId: "s", now: 1000 });
+    square(COLOMBO, 100).forEach((position, index) => {
+      state = measurementReducer(state, {
+        type: "ADD_MAP_POINT",
+        id: `p${index}`,
+        position,
+        now: 1000 + index,
+      });
+    });
+    setLocale("si");
+    const data = buildReportData(state);
+    expect(data.acres).toBe("2.471");
+    expect(data.areaRows.map((row) => row.value)).toEqual([
+      "10,000 m²",
+      "1.000 හෙක්.",
+      "395.4 පර්.",
+    ]);
+    expect(data.perimeterRows[0].value).toBe("400 මී.");
   });
 });
 

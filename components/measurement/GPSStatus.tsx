@@ -63,7 +63,13 @@ export function GPSStatusChip({ className }: { className?: string }) {
   return (
     <div className={cn("w-fit max-w-64 rounded-2xl bg-surface shadow-control", className)}>
       <div className="flex items-center gap-2 py-2 pr-1 pl-4">
-        <div className="min-w-0" role="status" aria-live="polite" data-testid="gps-status">
+        <div
+          className="min-w-0"
+          role="status"
+          aria-live="polite"
+          data-testid="gps-status"
+          data-locale-fade
+        >
           <SignalLabel />
           {accuracy && <p className="mt-0.5 text-sm text-muted tabular-nums">{accuracy}</p>}
         </div>

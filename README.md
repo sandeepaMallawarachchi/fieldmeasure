@@ -51,6 +51,10 @@ Browser-exposed tokens are public. Restrict them to your domain in the provider'
 
 If a map fails to load, the app switches to a built-in plain view that needs no network. Recording and calculations do not depend on the map.
 
+## Languages
+
+English and Sinhala, switched in the header and remembered on the device. First-time visitors get Sinhala if their browser's language is Sinhala, otherwise English. Sinhala text is set about 6% smaller because its letters look larger at the same size. All text is predefined in [lib/i18n](lib/i18n) (`en.ts` and `si.ts`), with no runtime translation. To add a language, add a file typed as `Messages` and register it in `lib/i18n/index.ts`.
+
 ## Using the app
 
 GPS needs a **secure context**: HTTPS, or `localhost` in development. To test on a phone during development, use an HTTPS tunnel or deploy a preview, since a LAN address such as `http://192.168.x.x` won't get location access.
@@ -101,7 +105,6 @@ Exports are 1600 x 1200 PNGs, composed on a canvas rather than screenshotted, na
 - Accuracy depends on the device, sky view and how closely the boundary is followed. The "±" figure is the device's own estimate, not a guaranteed limit. Expect metres of error on any point, which matters most on small plots.
 - Web apps only get reliable GPS in the foreground. The app keeps the screen awake where supported and warns if it was backgrounded, but it can't record while hidden.
 - Editing is by map gesture. Vertex editing isn't currently available by keyboard.
-- English only for now. Text is centralised in [lib/i18n](lib/i18n); Sinhala needs a reviewed translation and a font with Sinhala glyphs.
 
 ## Project layout
 

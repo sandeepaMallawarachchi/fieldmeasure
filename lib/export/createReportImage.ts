@@ -23,7 +23,7 @@ const MAP_W = 980;
 const MAP_PADDING = 90;
 
 function setFont(context: CanvasRenderingContext2D, size: number, weight: number, family: string) {
-  context.font = `${weight} ${size}px ${family}`;
+  context.font = `${weight} ${size * t.reportTextScale}px ${family}`;
 }
 
 function wrapText(context: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
@@ -130,7 +130,8 @@ function drawMapDecorations(
   const barWidth = meters / image.metersPerPixel;
   const barX = x + 24;
   const barY = y + h - 34;
-  const label = meters >= 1000 ? `${meters / 1000} km` : `${meters} m`;
+  const label =
+    meters >= 1000 ? `${meters / 1000} ${t.length.kilometers}` : `${meters} ${t.length.meters}`;
   context.fillStyle = "rgba(255,255,255,0.9)";
   context.beginPath();
   context.roundRect(barX - 12, barY - 34, barWidth + 24, 52, 8);
@@ -376,6 +377,8 @@ export async function createReportImage(data: ReportData): Promise<Blob> {
   const { width, height } = APP_CONFIG.exportSize;
   await document.fonts?.ready;
   const family = getComputedStyle(document.body).fontFamily || "sans-serif";
+  // Canvas text doesn't trigger web font loading, and the Sinhala font may not be in use yet.
+  await document.fonts?.load(`700 40px ${family}`, t.report.heading).catch(() => undefined);
 
   const mapTop = HEADER_H + 16;
   const mapHeight = height - mapTop - FOOTER_H - 16;

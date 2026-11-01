@@ -79,7 +79,7 @@ export function RecordingPanel() {
             </p>
             {areaUnit !== "squareMeters" && (
               <p className="text-xs text-muted tabular-nums">
-                {formatArea(areaM2, "squareMeters")} m²
+                {formatArea(areaM2, "squareMeters")} {t.units.squareMeters.short}
               </p>
             )}
           </div>

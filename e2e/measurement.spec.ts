@@ -332,6 +332,77 @@ test("installs a manifest and works offline after the first visit", async ({ pag
   await context.setOffline(false);
 });
 
+test("switches to Sinhala everywhere, keeping the measurement @responsive", async ({
+  page,
+  context,
+}, testInfo) => {
+  await startGrantedSession(page, context);
+  await page.setViewportSize(
+    testInfo.project.name === "desktop"
+      ? { width: 1440, height: 900 }
+      : { width: 360, height: 740 },
+  );
+  const headingSize = () =>
+    page
+      .getByRole("heading", { level: 2 })
+      .first()
+      .evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+  const englishSize = await headingSize();
+
+  await page.getByRole("radio", { name: "සිංහල" }).click();
+  await expect(page.getByRole("button", { name: "මැනීම අරඹන්න" })).toBeVisible();
+
+  // Slightly smaller, not dramatically so, and the switch's thumb slides across.
+  const sinhalaSize = await headingSize();
+  expect(sinhalaSize).toBeLessThan(englishSize);
+  expect(sinhalaSize).toBeGreaterThan(englishSize * 0.9);
+  const thumb = page.getByTestId("language-thumb");
+  expect(await thumb.evaluate((element) => getComputedStyle(element).transitionDuration)).toBe(
+    "0.2s",
+  );
+  await expect(thumb).toHaveClass(/translate-x-full/);
+  await expect(page.getByTestId("gps-status")).toContainText("GPS: හොඳයි");
+  expect(await page.evaluate(() => document.documentElement.lang)).toBe("si");
+  await page.evaluate(() => document.fonts.ready);
+  const shotName = `si-${testInfo.project.name}`;
+  await shot(page, `${shotName}-1-ready`);
+
+  // No button text may spill out of its button at this width.
+  const overflowing = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll("button")]
+        .filter((button) => button.scrollWidth > button.clientWidth + 1)
+        .map((button) => button.textContent),
+    );
+  expect(await overflowing()).toEqual([]);
+
+  await page.reload();
+  await expect(page.getByRole("button", { name: "මැනීම අරඹන්න" })).toBeVisible();
+
+  await page.getByRole("button", { name: "මැනීම අරඹන්න" }).click();
+  await expect(page.getByText("මනිමින්…")).toBeVisible();
+  await walkSquare(context, 30, 5, 800);
+  await shot(page, `${shotName}-2-recording`);
+  expect(await overflowing()).toEqual([]);
+
+  await page.getByRole("button", { name: "අවසන්", exact: true }).click();
+  await expect(page.locator(".fm-area-label")).toContainText("0.222 අක්කර");
+  await page.waitForTimeout(600);
+  await shot(page, `${shotName}-3-review`);
+  expect(await overflowing()).toEqual([]);
+
+  await page.getByRole("button", { name: "තහවුරු කරන්න" }).click();
+  await expect(page.getByTestId("result-area")).toHaveText("0.222 අක්කර");
+  await page.waitForTimeout(600);
+  await shot(page, `${shotName}-4-result`);
+  expect(await overflowing()).toEqual([]);
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "ප්‍රතිඵලය බාගන්න (PNG)" }).click();
+  const download = await downloadPromise;
+  await download.saveAs(`test-results/screens/${shotName}-report.png`);
+});
+
 test("asks for location on opening, without being tapped", async ({ page }) => {
   await skipInstallGuide(page);
   await page.addInitScript(() => {

@@ -101,7 +101,7 @@ export function ReviewPanel() {
         <MetricCard
           label={t.common.area}
           primary={`${formatArea(metrics.areaM2, areaUnit)} ${t.units[areaUnit].long}`}
-          secondary={`${formatArea(metrics.areaM2, "squareMeters")} m²`}
+          secondary={`${formatArea(metrics.areaM2, "squareMeters")} ${t.units.squareMeters.short}`}
           testId="review-area"
         />
         <MetricCard

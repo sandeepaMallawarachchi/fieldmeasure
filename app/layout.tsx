@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Noto_Sans_Sinhala } from "next/font/google";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 import { APP_NAME } from "@/config/app";
@@ -8,6 +8,12 @@ import { t } from "@/lib/i18n";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+// Geist has no Sinhala letters. The browser falls back to this font for those letters only.
+const notoSansSinhala = Noto_Sans_Sinhala({
+  variable: "--font-noto-sinhala",
+  subsets: ["sinhala"],
 });
 
 export const metadata: Metadata = {
@@ -30,7 +36,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${notoSansSinhala.variable} h-full antialiased`}
+    >
       <body className="h-full">{children}</body>
     </html>
   );

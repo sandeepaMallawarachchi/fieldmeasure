@@ -11,7 +11,7 @@ import {
 } from "maplibre-gl";
 import { formatArea } from "@/lib/geometry/conversions";
 import { measureGeodesicPolygon } from "@/lib/geometry/geodesy";
-import { t } from "@/lib/i18n";
+import { subscribeToLocale, t } from "@/lib/i18n";
 import { selectBoundaryMetrics, selectBoundaryPoints } from "@/lib/measurement/selectors";
 import { showToast } from "@/lib/toast";
 import { createId } from "@/lib/utils";
@@ -80,6 +80,7 @@ export class MapController {
   private readonly areaLabel: Marker;
   private readonly resizeObserver: ResizeObserver;
   private readonly unsubscribe: () => void;
+  private readonly unsubscribeLocale: () => void;
 
   private frame: number | null = null;
   private styleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -139,10 +140,16 @@ export class MapController {
     this.resizeObserver.observe(container);
 
     this.unsubscribe = store.subscribe(() => this.scheduleSync());
+    // The area label on the map has translated units, so it's redrawn on a language change.
+    this.unsubscribeLocale = subscribeToLocale(() => {
+      this.lastPoints = null;
+      this.scheduleSync();
+    });
   }
 
   destroy(): void {
     this.unsubscribe();
+    this.unsubscribeLocale();
     this.resizeObserver.disconnect();
     if (this.frame !== null) cancelAnimationFrame(this.frame);
     if (this.styleTimer !== null) clearTimeout(this.styleTimer);
