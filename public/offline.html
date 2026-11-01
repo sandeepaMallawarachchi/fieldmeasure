@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#08752E" />
+    <title>FieldMeasure - Offline</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        box-sizing: border-box;
+        background: #f7faf7;
+        color: #172b21;
+        font-family: system-ui, sans-serif;
+        text-align: center;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 8px;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.5;
+        max-width: 340px;
+        margin: 0 auto 20px;
+        color: #526073;
+      }
+      button {
+        min-height: 48px;
+        padding: 0 24px;
+        border: 0;
+        border-radius: 16px;
+        background: #08752e;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>You're offline</h1>
+      <p>
+        FieldMeasure hasn't been saved on this device yet. Connect to the internet once and open it
+        again, and it will then work without a connection.
+      </p>
+      <button type="button" onclick="location.reload()">Try Again</button>
+    </main>
+  </body>
+</html>

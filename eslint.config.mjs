@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored at build time from maplibre-gl.
+    "public/maplibre/**",
   ]),
 ]);
 
