@@ -55,23 +55,10 @@ export function useGeolocation(): void {
     };
   }, [shouldWatch]);
 
-  // Only skips the prompt for people who already granted access. First-time
-  // users are asked after they tap "Find My Location", never on page load.
+  // Asks for location as soon as the app opens. Starting the watch shows the
+  // browser's prompt if access hasn't been decided, and reports an error straight
+  // away if it was blocked, which the Ready panel then explains.
   useEffect(() => {
-    if (status !== "idle" || !navigator.permissions) return;
-    let cancelled = false;
-    navigator.permissions
-      .query({ name: "geolocation" })
-      .then((permission) => {
-        if (!cancelled && permission.state === "granted") {
-          measurementStore.dispatch({ type: "REQUEST_GPS" });
-        }
-      })
-      .catch(() => {
-        // Safari may reject this query; the user simply taps the button instead.
-      });
-    return () => {
-      cancelled = true;
-    };
+    if (status === "idle") measurementStore.dispatch({ type: "REQUEST_GPS" });
   }, [status]);
 }

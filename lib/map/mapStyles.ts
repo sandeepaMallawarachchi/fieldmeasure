@@ -65,7 +65,12 @@ export const MAP_STYLE_OPTIONS = buildStyleOptions({
   satelliteAllowExport: process.env.NEXT_PUBLIC_SATELLITE_ALLOW_EXPORT,
 });
 
-export const DEFAULT_MAP_STYLE: MapStyleId = MAP_STYLE_OPTIONS[0].id;
+/** Street first even when satellite is configured; satellite is a choice in the layers menu. */
+export function pickDefaultStyle(options: readonly MapStyleOption[]): MapStyleId {
+  return options.find((option) => option.id === "street")?.id ?? options[0].id;
+}
+
+export const DEFAULT_MAP_STYLE: MapStyleId = pickDefaultStyle(MAP_STYLE_OPTIONS);
 
 export function isStyleAvailable(id: MapStyleId): boolean {
   return MAP_STYLE_OPTIONS.some((option) => option.id === id);

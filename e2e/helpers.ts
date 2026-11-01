@@ -40,7 +40,15 @@ export async function walkSquare(context: BrowserContext, size = 30, step = 5, p
   }
 }
 
+/** Stops the install popup covering the screen in tests about something else. */
+export async function skipInstallGuide(page: Page) {
+  await page.addInitScript(() =>
+    window.localStorage.setItem("fieldmeasure.installGuideDismissed", "1"),
+  );
+}
+
 export async function startGrantedSession(page: Page, context: BrowserContext) {
+  await skipInstallGuide(page);
   await context.grantPermissions(["geolocation"]);
   await setPosition(context, START);
   page.on("dialog", (dialog) => void dialog.accept());

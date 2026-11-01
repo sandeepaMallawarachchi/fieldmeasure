@@ -3,8 +3,10 @@
 import { RotateCcw } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AppCredit } from "@/components/common/AppCredit";
 import { Toaster } from "@/components/common/Toaster";
 import { ConfirmDialog } from "@/components/dialogs/ConfirmDialog";
+import { InstallGuideDialog } from "@/components/dialogs/InstallGuideDialog";
 import { SettingsDialog } from "@/components/dialogs/SettingsDialog";
 import { AppHeader, SubHeader } from "@/components/layout/AppHeader";
 import { RecordingHeader } from "@/components/layout/RecordingHeader";
@@ -150,7 +152,12 @@ export function AppShell() {
           isRecording && "md:top-[calc(var(--safe-top)+136px)]",
         )}
       >
-        {isReadyPhase && <ReadyPanel />}
+        {isReadyPhase && (
+          <>
+            <ReadyPanel />
+            <AppCredit className="mt-3" />
+          </>
+        )}
         {isRecording && <RecordingPanel />}
         {isReviewing && <ReviewPanel />}
         {isCompleted && <ResultPanel />}
@@ -184,6 +191,8 @@ export function AppShell() {
           recovery.discard();
         }}
       />
+
+      <InstallGuideDialog blocked={recovery.session !== null} />
 
       <Toaster />
     </main>

@@ -180,9 +180,14 @@ export const en = {
     about:
       "Results are estimates from your phone's GPS. Accuracy depends on your device, sky view and how closely you follow the boundary. Area is calculated on the WGS84 Earth model.",
     install: "Install the app",
-    installAndroid: "Android: open the browser menu and choose Install app or Add to Home screen.",
-    installIos: "iPhone: tap Share in Safari, then Add to Home Screen.",
+    installAndroid:
+      "Android: in Chrome, open the ⋮ menu and choose Install app or Add to Home screen.",
+    installIos: "iPhone and iPad: in Safari, tap Share, then Add to Home Screen.",
     cleared: "Session cleared",
+    copyright: "Copyright © 2026. All rights reserved.",
+    credit: "Designed and Developed by",
+    creditName: "Sandeepa Mallawarachchi",
+    creditUrl: "https://www.linkedin.com/in/sandeepa-mallawarachchi",
   },
   map: {
     layers: "Change map type",
@@ -215,6 +220,24 @@ export const en = {
     body: "The current measurement will be replaced and you haven't downloaded it yet.",
     bodyDownloaded: "The current measurement will be replaced.",
     confirm: "Replace Measurement",
+  },
+  install: {
+    title: "Install FieldMeasure",
+    description:
+      "Add it to your home screen to open it like an app. After your first visit, it can also open without internet.",
+    installNow: "Install App",
+    notNow: "Not Now",
+    ios: [
+      "Open this page in Safari.",
+      "Tap the Share button.",
+      "Choose Add to Home Screen.",
+      "Tap Add.",
+    ],
+    android: [
+      "Open this page in Chrome.",
+      "Tap the ⋮ menu.",
+      "Choose Install app or Add to Home screen.",
+    ],
   },
   update: {
     available: "A new version of FieldMeasure is ready.",

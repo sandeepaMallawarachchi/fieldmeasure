@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AppCredit } from "@/components/common/AppCredit";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { AREA_UNIT_ORDER } from "@/config/units";
@@ -87,6 +88,7 @@ export function SettingsDialog({
             <p className="mt-1 text-sm leading-relaxed text-muted">{t.settings.installAndroid}</p>
             <p className="mt-1 text-sm leading-relaxed text-muted">{t.settings.installIos}</p>
           </section>
+          <AppCredit className="mt-6" />
         </DialogContent>
       </Dialog>
 

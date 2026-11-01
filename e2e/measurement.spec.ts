@@ -1,6 +1,14 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
-import { START, offset, setPosition, shot, startGrantedSession, walkSquare } from "./helpers";
+import {
+  START,
+  offset,
+  setPosition,
+  shot,
+  skipInstallGuide,
+  startGrantedSession,
+  walkSquare,
+} from "./helpers";
 
 test("walks a boundary from start to downloaded report", async ({ page, context }) => {
   const errors: string[] = [];
@@ -9,6 +17,11 @@ test("walks a boundary from start to downloaded report", async ({ page, context 
   await startGrantedSession(page, context);
   await expect(page.getByTestId("gps-status")).toContainText("GPS: Good");
   await expect(page.getByTestId("gps-status")).toContainText("Accuracy ±4.0 m");
+  await expect(page.getByText("Copyright © 2026. All rights reserved.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sandeepa Mallawarachchi" })).toHaveAttribute(
+    "target",
+    "_blank",
+  );
   await page.waitForTimeout(800);
   await shot(page, "1-ready");
 
@@ -230,10 +243,9 @@ test("explains blocked GPS and still offers map marking", async ({ page, context
     };
     navigator.geolocation.watchPosition = denied;
   });
+  await skipInstallGuide(page);
   await page.goto("/");
-  await expect(page.getByTestId("gps-status")).toContainText("GPS: Off");
-  await shot(page, "1a-idle");
-  await page.getByRole("button", { name: "Find My Location" }).click();
+  // Nothing is tapped: the app asks for location as soon as it opens.
   await expect(page.getByText("Location access is blocked")).toBeVisible();
   await expect(page.getByTestId("gps-status")).toContainText("GPS: Blocked");
   await shot(page, "1b-denied");
@@ -272,6 +284,14 @@ test("clears the session from settings", async ({ page, context }) => {
   await expect(page.getByRole("button", { name: "Start Measuring" })).toBeVisible();
   await page.getByRole("button", { name: "Settings" }).click();
   await expect(page.getByRole("dialog")).toContainText("temporarily stored on this device");
+  const credit = page.getByRole("link", { name: "Sandeepa Mallawarachchi" });
+  await expect(page.getByRole("dialog")).toContainText("Copyright © 2026. All rights reserved.");
+  await expect(credit).toHaveAttribute(
+    "href",
+    "https://www.linkedin.com/in/sandeepa-mallawarachchi",
+  );
+  await expect(credit).toHaveAttribute("target", "_blank");
+  await credit.scrollIntoViewIfNeeded();
   await shot(page, "settings");
   await page.getByRole("button", { name: "Clear Session" }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Clear Session" }).click();
@@ -312,7 +332,66 @@ test("installs a manifest and works offline after the first visit", async ({ pag
   await context.setOffline(false);
 });
 
+test("asks for location on opening, without being tapped", async ({ page }) => {
+  await skipInstallGuide(page);
+  await page.addInitScript(() => {
+    (window as unknown as { watchCalls: number }).watchCalls = 0;
+    navigator.geolocation.watchPosition = () => {
+      (window as unknown as { watchCalls: number }).watchCalls += 1;
+      return 1;
+    };
+  });
+  await page.goto("/");
+  await expect(page.getByTestId("gps-status")).toContainText("GPS: Searching");
+  expect(await page.evaluate(() => (window as unknown as { watchCalls: number }).watchCalls)).toBe(
+    1,
+  );
+});
+
+test("offers Android install steps once, and remembers dismissal", async ({ page, context }) => {
+  await context.grantPermissions(["geolocation"]);
+  await setPosition(context, START);
+  await page.goto("/");
+  const guide = page.getByTestId("install-guide");
+  await expect(guide).toContainText("Install FieldMeasure");
+  await expect(guide).toContainText("Open this page in Chrome");
+  await expect(guide).toContainText("Install app or Add to Home screen");
+  await shot(page, "install-android");
+  await page.getByRole("button", { name: "Not Now" }).click();
+  await expect(guide).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Start Measuring" })).toBeVisible();
+  await expect(guide).toHaveCount(0);
+});
+
+test.describe("on an iPhone", () => {
+  test.use({
+    userAgent:
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+  });
+
+  test("shows the Add to Home Screen steps", async ({ page, context }) => {
+    await context.grantPermissions(["geolocation"]);
+    await setPosition(context, START);
+    await page.goto("/");
+    await expect(page.getByTestId("install-guide")).toContainText("Open this page in Safari");
+    await expect(page.getByTestId("install-guide")).toContainText("Add to Home Screen");
+    await shot(page, "install-ios");
+  });
+});
+
+test("doesn't offer installation on desktop @responsive", async ({ page, context }, testInfo) => {
+  test.skip(testInfo.project.name !== "desktop", "Desktop only");
+  await context.grantPermissions(["geolocation"]);
+  await setPosition(context, START);
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Start Measuring" })).toBeVisible();
+  await page.waitForTimeout(500);
+  await expect(page.getByTestId("install-guide")).toHaveCount(0);
+});
+
 test("has no page overflow at any screen size @responsive", async ({ page, context }) => {
+  await skipInstallGuide(page);
   await context.grantPermissions(["geolocation"]);
   await setPosition(context, START);
   await page.goto("/");

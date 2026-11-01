@@ -38,6 +38,8 @@ All variables are optional and are read at build time. See [.env.example](.env.e
 | `NEXT_PUBLIC_MAP_API_KEY`            | Public token for the provider                                                                 |
 | `NEXT_PUBLIC_SATELLITE_ALLOW_EXPORT` | `true` only if the provider's terms allow imagery in downloaded images                        |
 
+The app always opens on the street map, and users switch to satellite with the layers button.
+
 **Satellite imagery needs a licensed provider**, so it is off until you configure one. For example, with [MapTiler](https://www.maptiler.com):
 
 ```env
@@ -53,9 +55,11 @@ If a map fails to load, the app switches to a built-in plain view that needs no 
 
 GPS needs a **secure context**: HTTPS, or `localhost` in development. To test on a phone during development, use an HTTPS tunnel or deploy a preview, since a LAN address such as `http://192.168.x.x` won't get location access.
 
-Location permission is requested only when the user taps **Find My Location** or starts measuring, never on page load. If it is blocked, the app explains how to allow it and still offers marking corners on the map.
+The app asks for location permission as soon as it opens. If access is blocked, it explains how to allow it and still offers marking corners on the map.
 
 ### Install
+
+On phones and tablets, a popup offers installation once GPS has been answered. It shows an **Install App** button where the browser supports one (Chrome on Android), and otherwise step-by-step instructions: Chrome on Android, Safari on iPhone and iPad. It doesn't appear on desktop or once installed, and after being dismissed it stays away on that device. The same steps remain in Settings.
 
 - **Android (Chrome):** browser menu, then _Install app_ or _Add to Home screen_.
 - **iPhone/iPad (Safari):** Share, then _Add to Home Screen_.

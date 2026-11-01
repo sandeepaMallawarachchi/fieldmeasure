@@ -7,7 +7,8 @@ import {
   findNearestVertex,
   polygonCollection,
 } from "@/lib/map/mapHelpers";
-import { buildStyleOptions } from "@/lib/map/mapStyles";
+import { buildStyleOptions, pickDefaultStyle } from "@/lib/map/mapStyles";
+import { detectInstallPlatform } from "@/lib/pwa/install";
 import { createInitialState, measurementReducer } from "@/lib/measurement/machine";
 import type { LngLat, MeasurementState } from "@/types/measurement";
 import { COLOMBO, offset, square } from "../helpers";
@@ -37,8 +38,55 @@ describe("map style configuration", () => {
     expect(satellite.allowExport).toBe(false);
   });
 
+  it("opens on the street map even when satellite is configured", () => {
+    const options = buildStyleOptions({ satelliteUrl: "https://example.test/s.json" });
+    expect(options.map((option) => option.id)).toContain("satellite");
+    expect(pickDefaultStyle(options)).toBe("street");
+  });
+
+  it("opens on satellite only if the street map is turned off", () => {
+    const options = buildStyleOptions({
+      streetUrl: "none",
+      satelliteUrl: "https://example.test/s.json",
+    });
+    expect(pickDefaultStyle(options)).toBe("satellite");
+    expect(pickDefaultStyle(buildStyleOptions({ streetUrl: "none" }))).toBe("plain");
+  });
+
   it("can disable network maps entirely", () => {
     expect(buildStyleOptions({ streetUrl: "none" }).map((option) => option.id)).toEqual(["plain"]);
+  });
+});
+
+describe("install guide platform", () => {
+  it.each([
+    [
+      "Android phone",
+      "Mozilla/5.0 (Linux; Android 14; Pixel 7) Mobile",
+      "Linux armv8l",
+      5,
+      "android",
+    ],
+    [
+      "Android tablet",
+      "Mozilla/5.0 (Linux; Android 14; SM-X710) Safari",
+      "Linux armv8l",
+      5,
+      "android",
+    ],
+    ["iPhone", "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", "iPhone", 5, "ios"],
+    ["iPad (older)", "Mozilla/5.0 (iPad; CPU OS 15_0 like Mac OS X)", "iPad", 5, "ios"],
+    [
+      "iPad (reports as a Mac)",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+      "MacIntel",
+      5,
+      "ios",
+    ],
+    ["Mac", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)", "MacIntel", 0, null],
+    ["Windows touch laptop", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Win32", 10, null],
+  ])("%s", (_name, userAgent, platform, touchPoints, expected) => {
+    expect(detectInstallPlatform(userAgent, platform, touchPoints)).toBe(expected);
   });
 });
 
