@@ -1,5 +1,8 @@
 # FieldMeasure
 
+<img width="1920" height="1080" alt="reddit" src="https://github.com/user-attachments/assets/3bf50cd2-24c4-4170-9a49-d29c82d7e658" />
+
+
 **Measure land by walking.** A mobile-first Progressive Web App that measures land area and perimeter by walking around a boundary with your phone's GPS. No account, no server-side storage.
 
 Results are estimates from consumer GPS. They are not a substitute for a professional land survey.
